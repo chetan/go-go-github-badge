@@ -3,6 +3,7 @@ package go_go_github_badge
 import (
 	"context"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -118,39 +119,64 @@ func GetForkCount(login string) (int, error) {
 	return query.User.Repositories.TotalCount, nil
 }
 
-type StargazerCountRepo struct {
-	StargazerCount int
+type RepoInfo struct {
+	StargazerCount  int
+	IsFork          bool
+	PrimaryLanguage struct {
+		Name string
+	}
 }
 
-type StargazerCountQuery struct {
+type RepoInfoQuery struct {
 	User struct {
 		Repositories struct {
 			PageInfo struct {
 				HasNextPage bool
 				EndCursor   string
 			}
-			Nodes []StargazerCountRepo
+			Nodes []RepoInfo
 		} `graphql:"repositories(first: 100, after: $cursor, orderBy: {field: PUSHED_AT, direction: DESC})"`
 	} `graphql:"user(login: $login)"`
 }
 
-func GetStargazerCount(login string) (int, error) {
+type RepoStats struct {
+	StargazerCount int
+	Languages      []*Lang
+}
+
+type Lang struct {
+	Name  string
+	Count int
+}
+
+func GetRepoStats(login string) (*RepoStats, error) {
 	args := gin.H{
 		"login":  githubv4.String(login),
 		"cursor": (*githubv4.String)(nil),
 	}
 
-	totalCount := 0
-	query := StargazerCountQuery{}
+	stats := RepoStats{}
+	langs := map[string]*Lang{}
+	query := RepoInfoQuery{}
 
+	// gather all repo stats
 	for {
 		err := gclient.Query(context.Background(), &query, args)
 		if err != nil {
-			return 0, errors.Wrap(err, "error fetching stargazers")
+			return nil, errors.Wrap(err, "error fetching stargazers")
 		}
 
 		for _, node := range query.User.Repositories.Nodes {
-			totalCount += node.StargazerCount
+			stats.StargazerCount += node.StargazerCount
+			if !node.IsFork {
+				// only count top languages for non-forks
+				if langs[node.PrimaryLanguage.Name] == nil {
+					langs[node.PrimaryLanguage.Name] = &Lang{node.PrimaryLanguage.Name, 1}
+					stats.Languages = append(stats.Languages, langs[node.PrimaryLanguage.Name])
+				} else {
+					langs[node.PrimaryLanguage.Name].Count += 1
+				}
+			}
 		}
 
 		if !query.User.Repositories.PageInfo.HasNextPage {
@@ -159,5 +185,10 @@ func GetStargazerCount(login string) (int, error) {
 		args["cursor"] = githubv4.NewString(githubv4.String(query.User.Repositories.PageInfo.EndCursor))
 	}
 
-	return totalCount, nil
+	// descending sort
+	sort.Slice(stats.Languages, func(i, j int) bool {
+		return stats.Languages[i].Count > stats.Languages[j].Count
+	})
+
+	return &stats, nil
 }

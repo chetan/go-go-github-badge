@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,7 +59,7 @@ func generateBadge(c *gin.Context) {
 		return
 	}
 
-	stargazerCount, err := GetStargazerCount(username)
+	repoStats, err := GetRepoStats(username)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -68,6 +69,11 @@ func generateBadge(c *gin.Context) {
 	// fmt.Println(github.Stringify(byRepo))
 	// fmt.Println(github.Stringify(contributions))
 	// fmt.Println(github.Stringify(contributions.User.Repositories.Nodes[0]))
+
+	langs := []string{}
+	for _, r := range repoStats.Languages {
+		langs = append(langs, r.Name)
+	}
 
 	c.HTML(http.StatusOK, "badge.gohtml", gin.H{
 		"username":           username,
@@ -79,6 +85,8 @@ func generateBadge(c *gin.Context) {
 		"TotalRepos":         contributions.User.Repositories.TotalCount,
 		"Repos":              contributions.User.Repositories.TotalCount - forkCount,
 		"Forks":              forkCount,
-		"Stargazers":         stargazerCount,
+		"Stargazers":         repoStats.StargazerCount,
+		"AllLanguages":       strings.Join(langs, ", "),
+		"TopLanguages":       strings.Join(langs[0:3], ", "),
 	})
 }

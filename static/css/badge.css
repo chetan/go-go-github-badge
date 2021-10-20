@@ -143,3 +143,9 @@ abbr {
     margin-right: 0;
     padding-right: 0;
 }
+#sparklines img {
+  height: 15px;
+  width: 15px;
+  padding-left: 5px;
+  margin-top: -1px;
+}

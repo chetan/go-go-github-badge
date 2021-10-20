@@ -93,7 +93,7 @@ func TestGetForkCount(t *testing.T) {
 	}
 }
 
-func TestGetStargazerCount(t *testing.T) {
+func TestGetRepoStats(t *testing.T) {
 	type args struct {
 		login string
 	}
@@ -106,14 +106,14 @@ func TestGetStargazerCount(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetStargazerCount(tt.args.login)
+			got, err := GetRepoStats(tt.args.login)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetStargazerCount() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetRepoStats() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got < 50 {
+			if got.StargazerCount < 50 {
 				// current min value as of 2021-10-20
-				t.Errorf("GetStargazerCount() = %v, want >= 50", got)
+				t.Errorf("GetRepoStats() = %v, want >= 50", got)
 			}
 		})
 	}
