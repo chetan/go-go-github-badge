@@ -5,9 +5,15 @@ import (
 	"testing"
 
 	"github.com/google/go-github/v39/github"
+	"github.com/joho/godotenv"
 )
 
 func init() {
+	err := godotenv.Overload()
+	if err != nil {
+		panic(err)
+	}
+	CreateClient()
 }
 
 func TestGetUser(t *testing.T) {
@@ -37,8 +43,6 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestGetLatestContributions(t *testing.T) {
-	CreateClient()
-
 	type args struct {
 		user *github.User
 	}
@@ -47,7 +51,6 @@ func TestGetLatestContributions(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{"chetan", args{&github.User{Login: ptr("chetan")}}, false},
 	}
 	for _, tt := range tests {
