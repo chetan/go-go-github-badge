@@ -34,6 +34,10 @@ func GetUser(username string) (*github.User, error) {
 
 type LatestContributions struct {
 	User struct {
+		Followers struct {
+			TotalCount int
+		}
+
 		Repositories struct {
 			TotalCount int
 			Nodes      []struct {
@@ -75,7 +79,6 @@ type LatestContributions struct {
 }
 
 func GetLatestContributions(user *github.User) (*LatestContributions, error) {
-
 	to := time.Now()
 	from := to.Add(-time.Hour * 24 * 90)
 	args := gin.H{
@@ -92,4 +95,69 @@ func GetLatestContributions(user *github.User) (*LatestContributions, error) {
 	}
 
 	return &query, nil
+}
+
+type ForkCount struct {
+	User struct {
+		Repositories struct {
+			TotalCount int
+		} `graphql:"repositories(isFork: true)"`
+	} `graphql:"user(login: $login)"`
+}
+
+func GetForkCount(login string) (int, error) {
+	args := gin.H{
+		"login": githubv4.String(login),
+	}
+	query := ForkCount{}
+	err := gclient.Query(context.Background(), &query, args)
+	if err != nil {
+		return 0, errors.Wrap(err, "error fetching fork count")
+	}
+
+	return query.User.Repositories.TotalCount, nil
+}
+
+type StargazerCountRepo struct {
+	StargazerCount int
+}
+
+type StargazerCountQuery struct {
+	User struct {
+		Repositories struct {
+			PageInfo struct {
+				HasNextPage bool
+				EndCursor   string
+			}
+			Nodes []StargazerCountRepo
+		} `graphql:"repositories(first: 100, after: $cursor, orderBy: {field: PUSHED_AT, direction: DESC})"`
+	} `graphql:"user(login: $login)"`
+}
+
+func GetStargazerCount(login string) (int, error) {
+	args := gin.H{
+		"login":  githubv4.String(login),
+		"cursor": (*githubv4.String)(nil),
+	}
+
+	totalCount := 0
+	query := StargazerCountQuery{}
+
+	for {
+		err := gclient.Query(context.Background(), &query, args)
+		if err != nil {
+			return 0, errors.Wrap(err, "error fetching stargazers")
+		}
+
+		for _, node := range query.User.Repositories.Nodes {
+			totalCount += node.StargazerCount
+		}
+
+		if !query.User.Repositories.PageInfo.HasNextPage {
+			break
+		}
+		args["cursor"] = githubv4.NewString(githubv4.String(query.User.Repositories.PageInfo.EndCursor))
+	}
+
+	return totalCount, nil
 }

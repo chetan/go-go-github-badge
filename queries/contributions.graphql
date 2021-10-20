@@ -1,0 +1,42 @@
+query contributions {
+  user(login: "chetan") {
+    followers {
+      totalCount
+    }
+
+    repositories(first: 50, orderBy: {field: PUSHED_AT, direction: DESC}) {
+      totalCount
+      nodes {
+        name
+        isPrivate
+        pushedAt
+        defaultBranchRef {
+          name
+          target {
+            ... on Commit {
+              history(since: "2021-09-19T23:05:23Z") {
+                totalCount
+              }
+            }
+          }
+        }
+      }
+    }
+    contributionsCollection(from: "2021-09-19T23:05:23Z", to: "2021-10-19T23:05:23Z") {
+      totalCommitContributions
+      user {
+        id
+      }
+      commitContributionsByRepository(maxRepositories: 10) {
+        contributions(first: 100) {
+          totalCount
+        }
+        repository {
+          isPrivate
+          name
+          url
+        }
+      }
+    }
+  }
+}

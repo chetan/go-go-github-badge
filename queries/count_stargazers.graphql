@@ -1,0 +1,12 @@
+  user(login: "chetan") {
+    repositories(first: 50, orderBy: {field: PUSHED_AT, direction: DESC}) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        stargazerCount
+      }
+    }
+  }

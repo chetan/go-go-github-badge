@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v39/github"
 )
 
 func Run() {
@@ -53,17 +52,33 @@ func generateBadge(c *gin.Context) {
 		return byRepo[j].Repository.UpdatedAt.Before(byRepo[i].Repository.UpdatedAt.Time)
 	})
 
-	fmt.Println("most recent: ", github.Stringify(byRepo[0].Repository.UpdatedAt.String()))
-	fmt.Println(github.Stringify(byRepo))
-	fmt.Println(github.Stringify(contributions))
+	forkCount, err := GetForkCount(username)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	fmt.Println(github.Stringify(contributions.User.Repositories.Nodes[0]))
+	stargazerCount, err := GetStargazerCount(username)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// fmt.Println("most recent: ", github.Stringify(byRepo[0].Repository.UpdatedAt.String()))
+	// fmt.Println(github.Stringify(byRepo))
+	// fmt.Println(github.Stringify(contributions))
+	// fmt.Println(github.Stringify(contributions.User.Repositories.Nodes[0]))
 
 	c.HTML(http.StatusOK, "badge.gohtml", gin.H{
 		"username":           username,
 		"title":              "Main website",
 		"User":               user,
+		"Followers":          contributions.User.Followers.TotalCount,
 		"TotalContributions": contributions.User.ContributionsCollection.ContributionCalendar.TotalContributions,
 		"Days":               30,
+		"TotalRepos":         contributions.User.Repositories.TotalCount,
+		"Repos":              contributions.User.Repositories.TotalCount - forkCount,
+		"Forks":              forkCount,
+		"Stargazers":         stargazerCount,
 	})
 }

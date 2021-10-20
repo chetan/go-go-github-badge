@@ -66,3 +66,55 @@ func TestGetLatestContributions(t *testing.T) {
 func ptr(s string) *string {
 	return &s
 }
+
+func TestGetForkCount(t *testing.T) {
+	type args struct {
+		login string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"chetan", args{"chetan"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetForkCount(tt.args.login)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetForkCount() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got < 123 {
+				// current value as of 2021-10-20
+				t.Errorf("GetForkCount() = %v, should be >= 123", got)
+			}
+		})
+	}
+}
+
+func TestGetStargazerCount(t *testing.T) {
+	type args struct {
+		login string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"chetan", args{"chetan"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetStargazerCount(tt.args.login)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetStargazerCount() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got < 50 {
+				// current min value as of 2021-10-20
+				t.Errorf("GetStargazerCount() = %v, want >= 50", got)
+			}
+		})
+	}
+}

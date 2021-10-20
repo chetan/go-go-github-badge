@@ -12,7 +12,7 @@
         <div class="clear" id="user-login">
             <div id="user-avatar">
                 <a href="{{ .User.HTMLURL }}" target="_parent"><img alt="{{ .User.Login }}" class="avatar"
-                        src="{{ .User.AvatarURL }}&amp;s=24"></a>
+                        src="{{ .User.AvatarURL }}&amp;s=48"></a>
             </div>
             <div id="user-overview">
                 <h1><a href="{{ .User.HTMLURL }}" target="_parent" title="{{ .User.Name }}">{{ .User.Login }}</a></h1>
@@ -29,11 +29,34 @@
             <div id="octocat">
                 <div id="user-graph">
                     <div id="sparkline">
+                        {{/*
                         <img alt="Commit sparkline" title="Commit sparkline: Maximum {{ .Max_commits }} commits"
                             src="{{ .Commit_sparkline }}">
+                        */}}
                     </div>
                 </div>
-                {{/* User info here */}}
+                <div id="user-info">
+                    <p><span
+                            title="">&hellip;</span></p>
+                    <ul class="clear" id="list-user-info">
+                        <li>
+                            <p>
+                                <strong>{{ .Repos }}</strong><span> repos</span>
+                            </p>
+                            <p>
+                                <strong>{{ .Forks }}</strong><span> forks</span>
+                            </p>
+                        </li>
+                        <li class="last">
+                            <p>
+                               <strong>{{ .Followers }}</strong><span> followers</span>
+                            </p>
+                            <p>
+                               <strong>{{ .Stargazers }}</strong><span> stargazers</span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
