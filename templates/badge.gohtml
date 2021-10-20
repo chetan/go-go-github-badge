@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ .User.Login }}'s GitHub Badge</title>
+    <link rel="stylesheet" href="/css/badge.css" media="screen">
+</head>
+
+<body>
+    <div class="clear">
+        <div class="clear" id="user-login">
+            <div id="user-avatar">
+                <a href="{{ .User.HTMLURL }}" target="_parent"><img alt="{{ .User.Login }}" class="avatar"
+                        src="{{ .User.AvatarURL }}&amp;s=24"></a>
+            </div>
+            <div id="user-overview">
+                <h1><a href="{{ .User.HTMLURL }}" target="_parent" title="{{ .User.Name }}">{{ .User.Login }}</a></h1>
+                <p>
+                {{if .TotalContributions}}
+                    <span>{{ .TotalContributions }} contributions in the last {{ .Days }} days.</span>
+                {{- else}}
+                    <span title="Based on the commits in the last {{ .Days }} days">No recent repo activity.</span>
+                {{end}}
+                </p>
+            </div>
+        </div>
+        <div id="user-content">
+            <div id="octocat">
+                <div id="user-graph">
+                    <div id="sparkline">
+                        <img alt="Commit sparkline" title="Commit sparkline: Maximum {{ .Max_commits }} commits"
+                            src="{{ .Commit_sparkline }}">
+                    </div>
+                </div>
+                {{/* User info here */}}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
