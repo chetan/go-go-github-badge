@@ -79,9 +79,9 @@ type LatestContributions struct {
 	} `graphql:"user(login: $login)"`
 }
 
-func GetLatestContributions(user *github.User) (*LatestContributions, error) {
+func GetLatestContributions(user *github.User, days int) (*LatestContributions, error) {
 	to := time.Now()
-	from := to.Add(-time.Hour * 24 * 90)
+	from := to.Add(-time.Hour * 24 * time.Duration(days))
 	args := gin.H{
 		"login": githubv4.String(*user.Login),
 		"from":  githubv4.DateTime{from},

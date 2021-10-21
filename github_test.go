@@ -55,7 +55,7 @@ func TestGetLatestContributions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := GetLatestContributions(tt.args.user); (err != nil) != tt.wantErr {
+			if _, err := GetLatestContributions(tt.args.user, 90); (err != nil) != tt.wantErr {
 				t.Errorf("GetLatestContributions() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			// t.FailNow()

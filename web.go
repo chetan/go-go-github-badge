@@ -10,6 +10,15 @@ import (
 )
 
 const cacheBadgeSec = 86400 * 7
+const contributionDays = 30
+
+var allowedUsers = map[string]bool{}
+
+func SetAllowedUsers(allowed []string) {
+	for _, u := range allowed {
+		allowedUsers[strings.TrimSpace(u)] = true
+	}
+}
 
 func Run() {
 	CreateClient()
@@ -33,15 +42,25 @@ func Run() {
 	r.Run()
 }
 
+func isUserAllowed(username string) bool {
+	return allowedUsers[username]
+}
+
 func generateBadge(c *gin.Context) {
 	username := c.Param("username")
+
+	if !isUserAllowed(username) {
+		c.String(http.StatusForbidden, "username not allowed")
+		return
+	}
+
 	user, err := GetUser(username)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	contributions, err := GetLatestContributions(user)
+	contributions, err := GetLatestContributions(user, contributionDays)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -83,7 +102,7 @@ func generateBadge(c *gin.Context) {
 		"User":               user,
 		"Followers":          contributions.User.Followers.TotalCount,
 		"TotalContributions": contributions.User.ContributionsCollection.ContributionCalendar.TotalContributions,
-		"Days":               30,
+		"Days":               contributionDays,
 		"TotalRepos":         contributions.User.Repositories.TotalCount,
 		"Repos":              contributions.User.Repositories.TotalCount - forkCount,
 		"Forks":              forkCount,
