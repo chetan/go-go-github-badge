@@ -6,3 +6,7 @@ queries
 
 .dockerignore
 Dockerfile
+
+Makefile
+LICENSE
+README.md
