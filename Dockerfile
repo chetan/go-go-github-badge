@@ -9,6 +9,12 @@ RUN cd /app && go build ./bin/go-go-github-badge
 # RUNTIME image
 FROM alpine AS runtime
 
+# personal access token for making github v4 api requests
+ENV GITHUB_TOKEN
+
+# restrict the users for which we can return badges
+ENV ALLOWED_USERS
+
 ENV GIN_MODE=release
 
 RUN mkdir /app
