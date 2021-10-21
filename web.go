@@ -16,7 +16,6 @@ func Run() {
 
 	r := gin.Default()
 
-	r.Static("/js", "./static/js")
 	r.Static("/css", "./static/css")
 	r.Static("/image", "./static/image")
 	r.StaticFile("/crossdomain.xml", "./static/crossdomain.xml")
