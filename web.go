@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const cacheBadgeSec = 86400 * 7
+
 func Run() {
 	CreateClient()
 
@@ -49,7 +51,6 @@ func generateBadge(c *gin.Context) {
 	// latest project
 	byRepo := contributions.User.ContributionsCollection.CommitContributionsByRepository
 	sort.Slice(byRepo, func(i, j int) bool {
-		fmt.Printf("%s: %s\n", byRepo[i].Repository.Name, byRepo[i].Repository.UpdatedAt.String())
 		return byRepo[j].Repository.UpdatedAt.Before(byRepo[i].Repository.UpdatedAt.Time)
 	})
 
@@ -74,6 +75,8 @@ func generateBadge(c *gin.Context) {
 	for _, r := range repoStats.Languages {
 		langs = append(langs, r.Name)
 	}
+
+	c.Header("cache-control", fmt.Sprintf("public, max-age=%d", cacheBadgeSec))
 
 	c.HTML(http.StatusOK, "badge.gohtml", gin.H{
 		"username":           username,
