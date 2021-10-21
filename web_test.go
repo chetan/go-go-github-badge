@@ -24,3 +24,26 @@ func Test_isUserAllowed(t *testing.T) {
 		})
 	}
 }
+
+func Test_isUserAllowedEmpty(t *testing.T) {
+	SetAllowedUsers([]string{})
+	type args struct {
+		username string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"chetan", args{"chetan"}, true},
+		{"foobar", args{"foobar"}, true},
+		{"baz", args{"baz"}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isUserAllowed(tt.args.username); got != tt.want {
+				t.Errorf("isUserAllowed() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

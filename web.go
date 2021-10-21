@@ -43,6 +43,9 @@ func Run() {
 }
 
 func isUserAllowed(username string) bool {
+	if len(allowedUsers) == 0 {
+		return true
+	}
 	return allowedUsers[username]
 }
 
