@@ -1,7 +1,9 @@
 package go_go_github_badge
 
 import (
+	_ "embed"
 	"fmt"
+	"html/template"
 	"net/http"
 	"sort"
 	"strings"
@@ -13,6 +15,12 @@ const cacheBadgeSec = 86400 * 7
 const contributionDays = 30
 
 var allowedUsers = map[string]bool{}
+
+//go:embed templates/badge.gohtml
+var badgeTemplate string
+
+//go:embed static/css/badge.css
+var css string
 
 func SetAllowedUsers(allowed []string) {
 	for _, u := range allowed {
@@ -28,7 +36,7 @@ func Run() {
 	r.Static("/css", "./static/css")
 	r.Static("/image", "./static/image")
 	r.StaticFile("/crossdomain.xml", "./static/crossdomain.xml")
-	r.LoadHTMLGlob("templates/*.gohtml")
+	r.SetHTMLTemplate(template.Must(template.New("badge.gohtml").Parse(badgeTemplate)))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -94,12 +102,15 @@ func generateBadge(c *gin.Context) {
 
 	langs := []string{}
 	for _, r := range repoStats.Languages {
-		langs = append(langs, r.Name)
+		if r.Name != "" {
+			langs = append(langs, r.Name)
+		}
 	}
 
 	c.Header("cache-control", fmt.Sprintf("public, max-age=%d", cacheBadgeSec))
 
 	c.HTML(http.StatusOK, "badge.gohtml", gin.H{
+		"CSS":                template.CSS(css),
 		"username":           username,
 		"title":              "Main website",
 		"User":               user,

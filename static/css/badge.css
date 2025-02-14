@@ -117,6 +117,12 @@ abbr {
 #user-info p {
     font-size: 11px;
 }
+.langs {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
 #list-user-info {
     margin: 7px 0 3px 0;
 }
